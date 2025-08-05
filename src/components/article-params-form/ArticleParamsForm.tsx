@@ -26,22 +26,26 @@ export type pageStateOptions = {
 	contentWidth: OptionType;
 };
 
+export type pageStyleOptions = {
+	'--font-family': OptionType['value'];
+	'--font-size': OptionType['value'];
+	'--font-color': OptionType['value'];
+	'--container-width': OptionType['value'];
+	'--bg-color': OptionType['value'];
+};
+
 export const ArticleParamsForm = ({
-	propsState,
 	initialState,
-	onSubmitHandler,
+	onStyleChange,
 }: {
-	propsState: pageStateOptions;
 	initialState: pageStateOptions;
-	onSubmitHandler: (newState: pageStateOptions) => void;
+	onStyleChange: (newSyle: pageStyleOptions) => void;
 }) => {
-	//const initialPageState = { ...propsState };
-	const [newPageState, setNewPageState] = useState({ ...propsState });
-	const [formState, setFormState] = useState({ ...propsState });
-	const [isOpen, setIsOpen] = useState(false);
+	const [newPageState, setNewPageState] = useState({ ...initialState });
+	const [formState, setFormState] = useState({ ...initialState });
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
 
 	const asideRef = useRef<HTMLElement | null>(null);
-	//const arrowButtonRef = useRef<HTMLButtonElement>(null);
 	const arrowButtonRef = useRef<HTMLDivElement | null>(null);
 
 	useEffect(() => {
@@ -69,11 +73,11 @@ export const ArticleParamsForm = ({
 				) &&
 				!eventElement.parentElement?.className.includes('Select-module')
 			) {
-				setIsOpen(false);
+				setIsMenuOpen(false);
 			}
 		};
 
-		if (isOpen) {
+		if (isMenuOpen) {
 			document.addEventListener('click', asideCloseFunction);
 		} else {
 			document.removeEventListener('click', asideCloseFunction);
@@ -82,7 +86,7 @@ export const ArticleParamsForm = ({
 		return () => {
 			document.removeEventListener('click', asideCloseFunction);
 		};
-	}, [isOpen]);
+	}, [isMenuOpen]);
 
 	const handleChangeInput = (option: OptionType) => {
 		if (option.className.includes('font-size')) {
@@ -99,30 +103,47 @@ export const ArticleParamsForm = ({
 	};
 
 	const handleOpenButton = () => {
-		setIsOpen(!isOpen);
+		setIsMenuOpen(!isMenuOpen);
 	};
 
 	const handleResetButton = () => {
 		setFormState({ ...initialState });
-		onSubmitHandler(initialState);
+		const initialStyle = {
+			'--font-family': initialState.fontFamily.value,
+			'--font-size': initialState.fontSize.value,
+			'--font-color': initialState.fontColor.value,
+			'--container-width': initialState.contentWidth.value,
+			'--bg-color': initialState.bgColor.value,
+		};
+		onStyleChange(initialStyle);
 	};
 
 	const handleFormSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
 		evt.preventDefault();
-		setIsOpen(false);
-		onSubmitHandler(newPageState);
+		const newStyle = {
+			'--font-family': newPageState.fontFamily.value,
+			'--font-size': newPageState.fontSize.value,
+			'--font-color': newPageState.fontColor.value,
+			'--container-width': newPageState.contentWidth.value,
+			'--bg-color': newPageState.bgColor.value,
+		};
+		onStyleChange(newStyle);
+		setIsMenuOpen(false);
 	};
 
 	return (
 		<>
 			<ArrowButton
-				isOpen={isOpen}
+				isOpen={isMenuOpen}
 				onClick={handleOpenButton}
 				ref={arrowButtonRef}
 			/>
 			<aside
 				ref={asideRef}
-				className={clsx(styles.container, isOpen ? styles.container_open : '')}>
+				className={clsx(
+					styles.container,
+					isMenuOpen ? styles.container_open : ''
+				)}>
 				<form className={styles.form} onSubmit={handleFormSubmit}>
 					<Text as='h2' size={31} weight={800} uppercase align='left'>
 						Задайте параметры
